@@ -10,7 +10,7 @@ export class AwsServiceController implements IAwsServiceController {
 	}
 
 	uploadFileToS3 = async (request: express.Request, response: express.Response): Promise<void> => {
-		const uploadMiddleware = this.uploadService.single('file');
+		const uploadMiddleware = this.uploadService.single('fileToUpload');
 
 		try {
 			await new Promise<void>((resolve, reject) => {
@@ -30,10 +30,18 @@ export class AwsServiceController implements IAwsServiceController {
 				return;
 			}
 
+			const file = request.file as Express.MulterS3.File;
+			const uploadDetails = {
+				fileName: file.originalname,
+				fileSize: file.size,
+				mimeType: file.mimetype,
+				key: file.key,
+				location: file.location  // S3 URL of the uploaded file
+			};
 
 			response.status(200).json({
-				ok: true,
 				message: 'File uploaded successfully',
+				file: uploadDetails
 			});
 		} catch (error) {
 			console.error('Error in uploadFileToS3:', error);
@@ -43,4 +51,11 @@ export class AwsServiceController implements IAwsServiceController {
 			});
 		}
 	}
+
+
+	deleteFileFromS3 = async (request: Express.Request, response: Express.Response): Promise<void> => {
+
+	}
+
+
 }
