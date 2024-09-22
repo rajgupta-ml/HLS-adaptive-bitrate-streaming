@@ -1,32 +1,22 @@
-
+import 'react-toastify/dist/ReactToastify.css';
 import "./css/app.css"
-import axios, { AxiosProgressEvent } from "axios"
+import axios, { AxiosError, AxiosProgressEvent } from "axios"
 import uploadIcon from "./assets/upload-icon.png";
 import { useRef, useState } from "react";
 import { UploadFileContent } from "./componets/UploadedFile.componet";
+import { toast, ToastContainer } from "react-toastify";
 
-interface IUploadResponse {
-  ok: boolean;
-  data: Record<string, string>;
-}
 function App() {
   const BASE_URL = "http://localhost:8080/api/v1"
   const inputRef = useRef<HTMLInputElement | null>(null);
-  const [responseState, setResponseState] = useState<IUploadResponse | null>(null);
   const [percentage, setPercentage] = useState<number>(0);
   const [fileUploaded, setFileUploaded] = useState<File | null>(null);
   const [loaded, setLoaded] = useState<number>(0);
   const [total, setTotal] = useState<number>(0);
-  async function startUpload() {
-    //Use toastify to return a toast for the error
-    if (!inputRef.current?.files || inputRef.current.files.length === 0) {
-      console.log("File not selected")
-      return;
-    }
-    setFileUploaded(inputRef.current.files[0]);
-    console.log(fileUploaded);
-    const formData = new FormData();
-    formData.append("fileToUpload", inputRef.current?.files[0]);
+
+
+  async function axiosPostRequest(formData: FormData) {
+
     try {
 
       const config = {
@@ -43,21 +33,36 @@ function App() {
         }
       }
 
-      const response = await axios.post(`${BASE_URL}/uploadFileToS3`, formData, config);
+      await axios.post(`${BASE_URL}/uploadFileToS3`, formData, config);
 
       setTimeout(() => {
         setPercentage(0);
       }, 1000)
 
-      console.log("file successfully uploaded")
-      if (response && response.data) setResponseState(response.data)
-      console.log(responseState)
+      toast("File Uploaded Successfully")
 
     } catch (error) {
-      console.log(error);
-      return
+      setFileUploaded(null)
+      if (error instanceof AxiosError) {
+        toast("Try after sometime")
+        return;
+      }
+
+      toast("Unknown error developers have been notified")
     }
 
+
+  }
+  async function startUpload() {
+    //Use toastify to return a toast for the error
+    if (!inputRef.current?.files || inputRef.current.files.length === 0) {
+      toast("File not selected")
+      return
+    }
+    setFileUploaded(inputRef.current.files[0]);
+    const formData = new FormData();
+    formData.append("fileToUpload", inputRef.current?.files[0]);
+    await axiosPostRequest(formData);
   }
   return (
 
@@ -95,7 +100,17 @@ function App() {
           </div>
         </div>
       </div >
-
+      <ToastContainer
+        position="top-right"
+        autoClose={5000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="light" />
 
     </>
   )

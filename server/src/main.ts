@@ -1,13 +1,17 @@
+import dotenv from "dotenv";
+dotenv.config()
+
 import express from "express";
 import cors from "cors"
-const app = express();
-app.use(cors({
-	origin: "*"
-}))
+import v1Router from "./router/v1Router";
 
-app.post("/api/v1/uploadFileToS3", (request: express.Request, response: express.Response) => {
-	console.log(request);
-	response.status(200).json({ success: "ok" });
+const app = express();
+app.use(cors({ origin: "*" }))
+app.use("/api/v1", v1Router);
+
+app.get("/healthCheck", (request: express.Request, response: express.Response) => {
+	response.status(200).json({ success: true })
 })
 
-app.listen(8080, () => console.log("The server is running"))
+const PORT = process.env.PORT || 8081;
+app.listen(PORT, () => console.log("The server is running on PORT", PORT))
