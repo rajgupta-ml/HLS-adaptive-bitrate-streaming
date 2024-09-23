@@ -27,3 +27,6 @@ dist-ssr
 .env.deployement
 .git
 
+m3u8Output
+temp
+
