@@ -1,7 +1,6 @@
 import express from "express";
 import { IAwsServiceController } from "../interface/IAwsServiceController.interface";
 import multer from "multer";
-import { CustomFile } from "../interface/ICustomData.interface";
 
 export class AwsServiceController implements IAwsServiceController {
 	private uploadService: multer.Multer;
@@ -31,15 +30,16 @@ export class AwsServiceController implements IAwsServiceController {
 				return;
 			}
 
-			const file = request.file as CustomFile;
-			
-			if(file && file.s3){
+			const file = request.file as Express.MulterS3.File;
+
+			if (file && file) {
 				const uploadDetails = {
 					fileName: file.originalname,
 					fileSize: file.size,
-					mimeType: file.mimetype,// S3 URL of the uploaded file
+					mimeType: file.mimetype,
+					fileDestination: file.destination// S3 URL of the uploaded file
 				};
-	
+
 				response.status(200).json({
 					message: 'File uploaded successfully',
 					file: uploadDetails

@@ -5,7 +5,7 @@ import uploadIcon from "./assets/upload-icon.png";
 import { useRef, useState } from "react";
 import { UploadFileContent } from "./componets/UploadedFile.componet";
 import { toast, ToastContainer } from "react-toastify";
-
+import { v4 as uuidv4 } from "uuid"
 function App() {
   const BASE_URL = "http://localhost:8080/api/v1"
   const inputRef = useRef<HTMLInputElement | null>(null);
@@ -14,9 +14,26 @@ function App() {
   const [loaded, setLoaded] = useState<number>(0);
   const [total, setTotal] = useState<number>(0);
 
+  function getMetaData(file: File): Promise<{ width: number, height: number }> {
 
+    return new Promise(resolve => {
+      const videoElement = document.createElement("video");
+      const fileURL = URL.createObjectURL(file);
+
+      videoElement.src = fileURL;
+      videoElement.onloadedmetadata = () => {
+        const width = videoElement.videoWidth;
+        const height = videoElement.videoHeight;
+        URL.revokeObjectURL(fileURL);
+        resolve({ width, height });
+      }
+
+    })
+
+
+  }
   async function axiosPostRequest(formData: FormData) {
-
+    console.log(formData)
     try {
 
       const config = {
@@ -59,15 +76,21 @@ function App() {
       toast("File not selected")
       return
     }
-    setFileUploaded(inputRef.current.files[0]);
+    const selectedFile = inputRef.current.files[0];
+    setFileUploaded(selectedFile);
+    const { width, height } = await getMetaData(selectedFile)
+    const fileExtension = selectedFile.name.split(".").pop();
+    const name = `${width}x${height}_${uuidv4()}.${fileExtension}`;
     const formData = new FormData();
-    formData.append("fileToUpload", inputRef.current?.files[0]);
+    formData.append("fileToUpload", selectedFile, name);
     await axiosPostRequest(formData);
   }
+
   return (
 
 
     <>
+
       <div className="main-container">
         <h1 className="heading">HLS - adaptive bitrate streaming</h1>
 

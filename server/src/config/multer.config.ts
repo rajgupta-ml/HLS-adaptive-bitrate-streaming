@@ -6,6 +6,7 @@ const storage = multerS3({
 	s3: s3,
 	bucket: process.env.S3_BUCKET_NAME || "",
 	key: (req, file, cb) => {
+		console.log(file);
 		cb(null, file.originalname);
 	},
 	contentType: multerS3.AUTO_CONTENT_TYPE,
