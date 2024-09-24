@@ -6,14 +6,10 @@ const storage = multerS3({
 	s3: s3,
 	bucket: process.env.S3_BUCKET_NAME || "",
 	key: (req, file, cb) => {
-		console.log(file);
 		cb(null, file.originalname);
 	},
 	contentType: multerS3.AUTO_CONTENT_TYPE,
-
 })
-
-
 const fileFilter = (req: express.Request, file: Express.Multer.File, cb: multer.FileFilterCallback) => {
 	// List of common video MIME types
 	const allowedVideoMimeTypes = [
@@ -28,13 +24,10 @@ const fileFilter = (req: express.Request, file: Express.Multer.File, cb: multer.
 		'video/3gpp',
 		'video/3gpp2',
 	];
-
 	if (allowedVideoMimeTypes.includes(file.mimetype)) {
 		cb(null, true);
 	} else {
 		cb(new Error('Invalid file type. Only video files are allowed.'));
 	}
 };
-
 export const upload = multer({ storage, fileFilter })
-
