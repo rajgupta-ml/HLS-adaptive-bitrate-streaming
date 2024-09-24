@@ -14,7 +14,6 @@ const config = {
 
 
 
-console.log(process.env.SQS_QUEUE_URL)
 const client = new SQSClient(config);
 const input: ReceiveMessageCommandInput = {
 	QueueUrl: process.env.SQS_QUEUE_URL || "",
@@ -29,6 +28,7 @@ const command = new ReceiveMessageCommand(input);
 			const { Messages } = await client.send(command);
 			if (!Messages) {
 				console.log("No message in the queue");
+				await new Promise(resolve => setTimeout(resolve, 20000));
 				continue;
 			}
 			console.log(JSON.parse(Messages[0].Body as string).s3);
