@@ -1,4 +1,5 @@
 import { ReceiveMessageCommand, ReceiveMessageCommandInput, ReceiveMessageCommandOutput, SQSClient, SQSClientConfig, SQSServiceException } from "@aws-sdk/client-sqs";
+import { getEncodingLadders } from "./getLadder.service";
 
 
 
@@ -62,7 +63,13 @@ export class SQSService {
 					continue;
 				}
 				const { bucket, object } = JSON.parse(Messages[0].Body).Records[0].s3;
-				console.log(`${bucket.name}, ${object.key}`)
+				const bucketName = bucket.name;
+				const objectName = object.key;
+				const resolution = (object.key).toString().split("_")[0];
+				const [width, height] = resolution.split("x");
+				const ladders = getEncodingLadders({ width, height })
+				const obj = { bucketName, objectName, resolution, ladders };
+				// Now Running the docker's parallel and deleting the event from sqs;
 
 
 			} catch (error) {
