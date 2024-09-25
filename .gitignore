@@ -27,6 +27,8 @@ dist-ssr
 .env.deployement
 .git
 
-m3u8Output
+m3u8
 temp
+
+video-streaming
 
