@@ -5,9 +5,9 @@ import dotenv from "dotenv";
 dotenv.config();
 
 import path from "path";
-import { ffmpegTranscoder } from "./ffmpegTranscoder";
 import { awsService } from "./service/aws.service";
 import { fileSystemService } from "./service/filesystem.service";
+import { ffmpegTranscoder } from "./service/ffmpegTranscoder";
 async function init() {
 	const tempDir = path.join(__dirname, "../temp");
 	const downloadBucketName = process.env.DOWNLOAD_BUCKET_NAME;
