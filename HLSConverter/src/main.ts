@@ -29,7 +29,7 @@ async function init() {
 		//saving the unit8Arry temporally
 		await fsService.saveFileTemp(unit8Array, tempDir);
 		//transcoder the file into m3u8
-		await ffmpegTranscoder(outputDir, tempFileDir);
+		await ffmpegTranscoder(outputDir, tempFileDir, fsService.ensureDirOrFile.bind(fsService));
 		//Upload the whole folder onto s3 bucket
 		console.log("Upload has started");
 		await service.uploadDirToS3(outputDir);

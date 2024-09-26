@@ -1,9 +1,8 @@
 import Ffmpeg from "fluent-ffmpeg";
-import { ensureDirOrFile } from "./saveFileTemp";
 
 
 
-export async function ffmpegTranscoder(outputDir: string, inputPath: string) {
+export async function ffmpegTranscoder(outputDir: string, inputPath: string, ensureDirOrFile : Function) {
 	await ensureDirOrFile(outputDir);
 	const { WIDTH, HEIGHT } = process.env
 	const outputPath = `${outputDir}/playlist.m3u8`
