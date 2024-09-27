@@ -13,7 +13,7 @@ function App() {
   const [fileUploaded, setFileUploaded] = useState<File | null>(null);
   const [loaded, setLoaded] = useState<number>(0);
   const [total, setTotal] = useState<number>(0);
-
+  const ws_URI = "ws://localhost:8001";
   function getMetaData(file: File): Promise<{ width: number, height: number }> {
 
     return new Promise(resolve => {
@@ -32,8 +32,32 @@ function App() {
 
 
   }
+
+  function wsManager(uuid: string) {
+    const ws = new WebSocket(ws_URI);
+    const data = {
+      type: "client",
+      uuid
+    }
+    ws.addEventListener("open", () => {
+      ws.send(JSON.stringify(data));
+    })
+
+    ws.addEventListener("message", (event) => {
+      const data = event.data;
+
+
+      try {
+        const parseData = JSON.parse(data);
+        console.log(parseData);
+
+      } catch (error) {
+        console.error("Failed to parse message data: ", error);
+      }
+    })
+  }
+
   async function axiosPostRequest(formData: FormData) {
-    console.log(formData)
     try {
 
       const config = {
@@ -76,14 +100,17 @@ function App() {
       toast("File not selected")
       return
     }
+
+    const uuid = uuidv4();
     const selectedFile = inputRef.current.files[0];
     setFileUploaded(selectedFile);
     const { width, height } = await getMetaData(selectedFile)
     const fileExtension = selectedFile.name.split(".").pop();
-    const name = `${width}x${height}_${uuidv4()}.${fileExtension}`;
+    const name = `${width}x${height}_${uuid}.${fileExtension}`;
     const formData = new FormData();
     formData.append("fileToUpload", selectedFile, name);
     await axiosPostRequest(formData);
+    wsManager(uuid)
   }
 
   return (

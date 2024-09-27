@@ -1,7 +1,10 @@
 import { ReceiveMessageCommand, ReceiveMessageCommandInput, ReceiveMessageCommandOutput, SQSClient, SQSClientConfig, SQSServiceException } from "@aws-sdk/client-sqs";
 import { getEncodingLadders } from "./getLadder.service";
 
-
+//TODO: Spin-up multiple ECS containers and this conntainers would connect to the main-server using websocket so that logs could be streamed back to the client 
+//TODO: The SQSConsumer would generate the folder and upload a master file onto the folder. This folder will be used to upload all the m3u8 and .ts files.
+//TODO: The server would return the link for the master file.
+//TODO: Create the UI for the logs to be watched
 
 export class SQSService {
 

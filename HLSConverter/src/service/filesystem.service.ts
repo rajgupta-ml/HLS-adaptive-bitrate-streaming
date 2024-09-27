@@ -20,7 +20,7 @@ export class fileSystemService {
 
 
 	async dirDelete(dir: string) {
-		await fs.promises.rmdir(dir, { recursive: true });
+		await fs.promises.rm(dir, { recursive: true });
 		console.log(`${dir} has been deleted`);
 	}
 
