@@ -13,8 +13,8 @@ interface ProcessingStep {
 }
 
 export default function VideoUpload() {
-  const BASE_URL = "http://localhost:8080/api/v1"
-  const ws_URI = "ws://localhost:8001"
+  const BASE_URL = "http://65.0.76.111/api/v1"
+  const ws_URI = "ws://65.0.76.111"
   const inputRef = useRef<HTMLInputElement>(null)
   const [file, setFile] = useState<File | null>(null)
   const [loaded, setLoaded] = useState<number>(0)

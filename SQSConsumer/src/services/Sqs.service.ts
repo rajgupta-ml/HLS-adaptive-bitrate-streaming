@@ -77,7 +77,7 @@ export class SQSService {
 				const [width, height] = resolution.split("x");
 				const ladders = getEncodingLadders({ width, height })
 				// Now Running the docker's parallel and deleting the event from sqs;
-				const regex = /_(.*?)\.mp4/; // Correct regex definition
+				const regex = /\d+x\d+_(.*?)\.mp4/; // Correct regex definition
 				const match = objectName.match(regex);
 				const folder = match ? match[1] : ''; // Ensure match is valid
 
@@ -85,7 +85,7 @@ export class SQSService {
 				ladders.map((ladder) => {
 					console.log(ladder);
 					const [width, height] = ladder.resolution.split("x");
-					promise.push(this.ecs.runTask(objectName, width, height, folder[1], bucketName));
+					promise.push(this.ecs.runTask(objectName, width, height, folder, bucketName));
 				})
 
 				await Promise.all(promise);

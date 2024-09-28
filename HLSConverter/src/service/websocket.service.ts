@@ -14,7 +14,7 @@ export class ws {
 	private readonly uuid: string;
 	private readonly client_uuid: string;
 
-	constructor(uuid: string, wsURI: string = "ws://localhost:8001") {
+	constructor(uuid: string, wsURI: string = "ws://65.0.76.111") {
 		this.uuid = uuid;
 		this.wsURI = wsURI;
 		this.client_uuid = randomUUID();

@@ -13,7 +13,7 @@ export async function ffmpegTranscoder(outputDir: string, inputPath: string, ens
 			console.error("Environment variables cannot be empty");
 			return
 		}
-		const outputPath = `${outputDir}/playlist.m3u8`
+		const outputPath = `${outputDir}/${WIDTH}x${HEIGHT}playlist.m3u8`
 
 		return new Promise<string>((resolve, reject) => {
 			Ffmpeg(inputPath)

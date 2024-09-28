@@ -1,9 +1,10 @@
 import WebSocket, { WebSocketServer } from "ws";
 import { Server } from "http"
 interface IDocker {
-	progress: number;
+	progress: Map<string, number>;
 	noOfDockerInit: number;
 	dockers_uuids: string[];
+	totalProgress: number;
 }
 
 interface IMessage {
@@ -90,9 +91,10 @@ export class WebSocketManager {
 		let dockerInfo = this.progressManager.get(clientUuid);
 		if (!dockerInfo) {
 			dockerInfo = {
-				progress: 0,
+				progress: new Map<string, number>(),
 				noOfDockerInit: 0,
-				dockers_uuids: []
+				dockers_uuids: [],
+				totalProgress: 0
 			};
 			this.progressManager.set(clientUuid, dockerInfo);
 		}
@@ -100,12 +102,17 @@ export class WebSocketManager {
 
 		if (!dockerInfo.dockers_uuids.includes(dockerUuid)) {
 			dockerInfo.dockers_uuids.push(dockerUuid);
-			dockerInfo.noOfDockerInit = dockerInfo.dockers_uuids.length;
+			dockerInfo.noOfDockerInit++;
 		}
 
-		dockerInfo.progress = Math.max(dockerInfo.progress, percentage);
+		const oldProgress = dockerInfo.progress.get(dockerUuid) || 0;
+		dockerInfo.progress.set(dockerUuid, percentage);
+		dockerInfo.totalProgress += percentage - oldProgress;
 
-		const overallProgress = Math.floor(dockerInfo.progress / dockerInfo.noOfDockerInit);
+
+		const averageProgress = Math.floor(dockerInfo.totalProgress / dockerInfo.noOfDockerInit);
+		const allCompleted = dockerInfo.totalProgress === 100 * dockerInfo.noOfDockerInit;
+
 
 		console.log(dockerInfo);
 
@@ -113,8 +120,8 @@ export class WebSocketManager {
 		if (clientWs) {
 			console.log(clientWs);
 			clientWs.send(JSON.stringify({
-				type: overallProgress === 100 ? "completed" : "progress",
-				progress: overallProgress
+				type: allCompleted ? "completed" : "progress",
+				progress: averageProgress
 			}));
 		}
 	}
