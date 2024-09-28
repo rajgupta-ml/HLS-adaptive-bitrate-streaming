@@ -1,12 +1,12 @@
-
 FROM ubuntu:20.04
 
-# Install Node.js
-RUN apt-get update && apt-get upgrade -y
-RUN apt-get install -y curl
-RUN curl -fsSL https://deb.nodesource.com/setup_22.x -o nodesource_setup.sh
-RUN bash nodesource_setup.sh
-RUN apt-get install -y nodejs
+# Install Node.js and ffmpeg
+RUN apt-get update && apt-get upgrade -y && \
+    apt-get install -y curl && \
+    curl -fsSL https://deb.nodesource.com/setup_22.x -o nodesource_setup.sh && \
+    bash nodesource_setup.sh && \
+    apt-get install -y nodejs && \
+    apt-get install -y ffmpeg
 
 WORKDIR /HSLConverter
 
