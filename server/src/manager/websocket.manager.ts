@@ -1,5 +1,5 @@
 import WebSocket, { WebSocketServer } from "ws";
-
+import { Server } from "http"
 interface IDocker {
 	progress: number;
 	noOfDockerInit: number;
@@ -16,28 +16,27 @@ interface IMessage {
 
 export class WebSocketManager {
 	private readonly wss: WebSocketServer;
-	private readonly wsPORT: number;
 	private static wsInstance: WebSocketManager;
 	private clientSockets: Map<string, WebSocket>;
 	private dockerSockets: Map<string, WebSocket>;
 	private progressManager: Map<string, IDocker>;
 
-	private constructor() {
-		this.wsPORT = Number(process.env.WS_PORT) || 8001;
-		this.wss = new WebSocketServer({ port: this.wsPORT });
+	private constructor(app: Server) {
+		this.wss = new WebSocketServer({ server: app });
 		this.clientSockets = new Map<string, WebSocket>();
 		this.dockerSockets = new Map<string, WebSocket>();
 		this.progressManager = new Map<string, IDocker>();
 	}
 
-	public static getInstance(): WebSocketManager {
+	public static getInstance(app: Server): WebSocketManager {
 		if (!WebSocketManager.wsInstance) {
-			WebSocketManager.wsInstance = new WebSocketManager();
+			WebSocketManager.wsInstance = new WebSocketManager(app);
 		}
 		return WebSocketManager.wsInstance;
 	}
 
 	public init(): void {
+		console.log(this.wss)
 		this.wss.on("connection", (ws: WebSocket) => {
 			console.log("New WebSocket connection established");
 
@@ -55,7 +54,6 @@ export class WebSocketManager {
 			});
 		});
 
-		console.log(`WebSocket server is running on port ${this.wsPORT}`);
 	}
 
 	private handleMessage(ws: WebSocket, message: IMessage): void {
@@ -148,6 +146,3 @@ export class WebSocketManager {
 	}
 }
 
-// Usage:
-// const wsManager = WebSocketManager.getInstance();
-// wsManager.init();

@@ -1,4 +1,5 @@
 import dotenv from "dotenv";
+import http, { Server } from "http"
 dotenv.config()
 
 import express from "express";
@@ -15,8 +16,10 @@ app.get("/healthCheck", (request: express.Request, response: express.Response) =
 	response.status(200).json({ success: true })
 })
 
-const PORT = process.env.PORT || 8081;
-app.listen(PORT, () => {
-	const ws = WebSocketManager.getInstance();
+const server: Server = http.createServer(app)
+const PORT = process.env.PORT;
+server.listen(PORT, () => {
+	console.log(`the server is running on port : ${PORT}`)
+	const ws = WebSocketManager.getInstance(server);
 	ws.init();
 })
