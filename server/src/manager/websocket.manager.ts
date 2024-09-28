@@ -115,7 +115,7 @@ export class WebSocketManager {
 		if (clientWs) {
 			console.log(clientWs);
 			clientWs.send(JSON.stringify({
-				type: 'progress',
+				type: overallProgress === 100 ? "completed" : "progress",
 				progress: overallProgress
 			}));
 		}
