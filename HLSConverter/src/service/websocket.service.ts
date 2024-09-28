@@ -36,8 +36,7 @@ export class ws {
 			});
 
 			this.ws.on("close", () => {
-				console.log("Connection closed. Attempting to reconnect...");
-				this.reconnect();
+				this.close();
 			});
 		});
 	}
@@ -63,10 +62,6 @@ export class ws {
 		}
 	}
 
-	private reconnect() {
-		// Optional: Add a delay or exponential backoff strategy
-		setTimeout(() => this.connect(), 1000);
-	}
 
 	close() {
 		if (this.ws) {
