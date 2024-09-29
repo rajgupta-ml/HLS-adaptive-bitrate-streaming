@@ -1,0 +1,54 @@
+import React from "react";
+import { Event } from "ws";
+
+
+type ISetIsPlaying = React.Dispatch<React.SetStateAction<boolean>>
+type IDuration = React.Dispatch<React.SetStateAction<number>>
+export class Controls {
+
+  handlePlayAndPause(controls: HTMLVideoElement | null, isPlaying: boolean, setIsPlaying: ISetIsPlaying, setDuration: IDuration) {
+    if (controls) {
+      if (isPlaying) {
+        controls.pause();
+      } else {
+        controls.play();
+      }
+      setIsPlaying(!isPlaying);
+      setDuration(controls.duration);
+    }
+    console.log(controls?.duration)
+  }
+
+  handleFullScreen(controls: HTMLDivElement | null, setIsFullScreen: React.Dispatch<React.SetStateAction<boolean>>) {
+    if (!controls) {
+      console.error("HandleFullScreen: Something went wrong");
+      return;
+    }
+    if (!document.fullscreenElement) {
+      controls.requestFullscreen();
+    } else {
+      document.exitFullscreen()
+    }
+    setIsFullScreen((!!document.fullscreenElement));
+  }
+
+
+  setWidthOfProgressFill(progressControls: HTMLDivElement | null, event: HTMLVideoElement, setCurrentTime: IDuration, setProgress: IDuration) {
+    //    const currentTime = event.currentTime;
+    //    const totalDuration = event.duration;
+    //    const totalWidth = progressControls?.clientWidth;
+
+    console.log(event)
+
+    //    if (totalDuration <= 0 || !totalWidth || totalWidth <= 0 || !currentTime) {
+    //      console.error("setWidthOfProgressFill Error: Invalid duration or width");
+    //      return;
+    //    }
+
+    //    const progressWidth = (currentTime / totalDuration) * totalWidth;
+    //    console.log("Progress Width:", progressWidth);
+    //    setProgress(progressWidth);
+    //    setCurrentTime(currentTime);
+  }
+
+}

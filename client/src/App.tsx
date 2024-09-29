@@ -6,7 +6,7 @@ import 'react-toastify/dist/ReactToastify.css'
 import axios, { AxiosProgressEvent } from 'axios'
 import { v4 as uuidv4 } from 'uuid'
 import { Progress } from './components/ui/progress'
-
+import VideoPlayer from './components/ui/video-player'
 interface ProcessingStep {
   name: string;
   status: 'pending' | 'active' | 'completed';
@@ -213,6 +213,7 @@ export default function VideoUpload() {
           </ScrollArea>
         )}
       </div>
+      <VideoPlayer></VideoPlayer>
       <ToastContainer
         position="top-right"
         autoClose={5000}
