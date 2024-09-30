@@ -82,7 +82,6 @@ export class AwsServiceController implements IAwsServiceController {
 			await generateMasterM3U8(Number(informationExtraction.height));
 			await uploadMasterFile(informationExtraction.uuid)
 			const masterFileUri = new URL(`https://hls-processed-files.s3.ap-south-1.amazonaws.com/${informationExtraction.uuid}/master.m3u8`);
-			await fs.promises.rm(path.join(__dirname, "..temp"), { recursive: true });
 			response.status(200).json({
 				success: true,
 				masterFileUri,
@@ -93,6 +92,12 @@ export class AwsServiceController implements IAwsServiceController {
 				error: 'An error occurred while uploading the master file',
 				details: error instanceof Error ? error.message : 'Unknown error'
 			});
+		} finally {
+			try {
+				await fs.promises.rm(path.join(__dirname, "../temp"), { recursive: true });
+			} catch (error) {
+				console.error("Clean up could not be complete")
+			}
 		}
 
 	}

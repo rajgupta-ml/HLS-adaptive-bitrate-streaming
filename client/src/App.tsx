@@ -8,18 +8,17 @@ import { v4 as uuidv4 } from 'uuid'
 import { Progress } from './components/ui/progress'
 import VideoPlayer from './components/ui/video-player'
 import { Button } from './components/ui/button'
-import { Toast } from 'node_modules/react-toastify/dist/components'
 interface ProcessingStep {
   name: string;
   status: 'pending' | 'active' | 'completed';
 }
 
 export default function VideoUpload() {
-  const BASE_URL = "http://localhost:8080/api/v1"
-  const ws_URI = "ws://localhost:8080"
+  // const BASE_URL = "http://localhost:8080/api/v1"
+  // const ws_URI = "ws://localhost:8080"
 
-  //  const BASE_URL = "http://65.0.76.111/api/v1"
-  // const ws_URI = "ws://65.0.76.111"
+  const BASE_URL = "http://65.0.76.111/api/v1"
+  const ws_URI = "ws://65.0.76.111"
   const inputRef = useRef<HTMLInputElement>(null)
   const [file, setFile] = useState<File | null>(null)
   const [loaded, setLoaded] = useState<number>(0)
@@ -167,7 +166,7 @@ export default function VideoUpload() {
     formData.append("fileToUpload", file, name)
 
     updateProcessingStep("Upload Initalized", 'active')
-    //  await axiosPostRequest(formData)
+    await axiosPostRequest(formData)
     const response = await getMasterFileUri(formData)
     setVideoUri(response.masterFileUri);
     wsManager(uuid)

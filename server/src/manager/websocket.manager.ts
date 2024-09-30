@@ -113,11 +113,9 @@ export class WebSocketManager {
 		const allCompleted = dockerInfo.totalProgress === 100 * dockerInfo.noOfDockerInit;
 
 
-		console.log(dockerInfo);
 
 		const clientWs = this.clientSockets.get(clientUuid);
 		if (clientWs) {
-			console.log(clientWs);
 			clientWs.send(JSON.stringify({
 				type: allCompleted ? "completed" : "progress",
 				progress: averageProgress

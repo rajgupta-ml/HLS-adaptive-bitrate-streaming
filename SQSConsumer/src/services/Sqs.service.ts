@@ -74,7 +74,7 @@ export class SQSService {
 				const [width, height] = resolution.split("x");
 				const ladders = getEncodingLadders({ width, height })
 				// Now Running the docker's parallel and deleting the event from sqs;
-				const regex = /\d+x\d+_(.*?)\.mp4/; // Correct regex definition
+				const regex = /\d+x\d+_(.*?)\./; // Correct regex definition
 				const match = objectName.match(regex);
 				const folder = match ? match[1] : ''; // Ensure match is valid
 
