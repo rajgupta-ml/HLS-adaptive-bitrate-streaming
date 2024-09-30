@@ -37,7 +37,6 @@ export class WebSocketManager {
 	}
 
 	public init(): void {
-		console.log(this.wss)
 		this.wss.on("connection", (ws: WebSocket) => {
 			console.log("New WebSocket connection established");
 

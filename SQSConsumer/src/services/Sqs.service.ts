@@ -3,9 +3,6 @@ import { getEncodingLadders } from "./getLadder.service";
 import { ecsService } from "./Ecs.service";
 import { RunTaskCommandOutput } from "@aws-sdk/client-ecs";
 
-//TODO: Spin-up multiple ECS containers and this conntainers would connect to the main-server using websocket so that logs could be streamed back to the client 
-//TODO: The SQSConsumer would generate the folder and upload a master file onto the folder. This folder will be used to upload all the m3u8 and .ts files.
-//TODO: The server would return the link for the master file.
 
 export class SQSService {
 

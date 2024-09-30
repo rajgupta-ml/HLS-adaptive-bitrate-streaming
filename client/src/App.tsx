@@ -1,5 +1,5 @@
 import { useRef, useState, useCallback, useEffect } from 'react'
-import { Upload, FileVideo, CheckCircle } from 'lucide-react'
+import { Upload, FileVideo, CheckCircle, XIcon, ClipboardIcon, VideoIcon } from 'lucide-react'
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { toast, ToastContainer } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
@@ -7,14 +7,19 @@ import axios, { AxiosProgressEvent } from 'axios'
 import { v4 as uuidv4 } from 'uuid'
 import { Progress } from './components/ui/progress'
 import VideoPlayer from './components/ui/video-player'
+import { Button } from './components/ui/button'
+import { Toast } from 'node_modules/react-toastify/dist/components'
 interface ProcessingStep {
   name: string;
   status: 'pending' | 'active' | 'completed';
 }
 
 export default function VideoUpload() {
-  const BASE_URL = "http://65.0.76.111/api/v1"
-  const ws_URI = "ws://65.0.76.111"
+  const BASE_URL = "http://localhost:8080/api/v1"
+  const ws_URI = "ws://localhost:8080"
+
+  //  const BASE_URL = "http://65.0.76.111/api/v1"
+  // const ws_URI = "ws://65.0.76.111"
   const inputRef = useRef<HTMLInputElement>(null)
   const [file, setFile] = useState<File | null>(null)
   const [loaded, setLoaded] = useState<number>(0)
@@ -29,8 +34,10 @@ export default function VideoUpload() {
     { name: "Process Complete", status: 'pending' }
   ])
 
+  const [openVideo, setOpenVideo] = useState<boolean>(false);
+  const [videoUri, setVideoUri] = useState<string>("");
+  const [stepCompleted, setStepCompleted] = useState<boolean>(false);
   const getCompletedSteps = () => processingSteps.filter((step) => step.status === "completed").length;
-
   const updateProcessingStep = useCallback((stepName: string, status: 'pending' | 'active' | 'completed') => {
     setProcessingSteps(prevSteps =>
       prevSteps.map(step =>
@@ -39,6 +46,10 @@ export default function VideoUpload() {
     )
   }, [])
 
+  const handleCopy = () => {
+    navigator.clipboard.writeText(videoUri);
+    toast("url is copied to your clipboard")
+  }
   const getMetaData = (file: File): Promise<{ width: number, height: number }> => {
     return new Promise(resolve => {
       const videoElement = document.createElement("video")
@@ -77,12 +88,36 @@ export default function VideoUpload() {
         } else if (parseData.type === "completed") {
           updateProcessingStep("Finalizing", 'completed');
           setTimeout(() => updateProcessingStep("Process Complete", 'completed'), 2000);
+          setTimeout(() => setStepCompleted(true), 4000);
         }
       } catch (error) {
         console.error("Failed to parse message data: ", error)
       }
     })
   }, [updateProcessingStep])
+
+
+
+  async function getMasterFileUri(formData: FormData) {
+    const file = formData.get("fileToUpload");
+    let fileName: string | null = null;
+
+    if (file instanceof File) {
+      fileName = file.name;
+    } else {
+      console.error("No valid file found under the key 'fileToUpload'.");
+      return; // Exit early if no valid file
+    }
+
+    try {
+      const response = await axios.post(`${BASE_URL}/get-uri`, { fileName });
+      return response.data; // Assuming you want to return the response data
+    } catch (error) {
+      console.error("Error while getting the master file URI:", error);
+      throw error; // Optionally rethrow the error for further handling
+    }
+  }
+
 
   const axiosPostRequest = useCallback(async (formData: FormData) => {
     try {
@@ -132,7 +167,9 @@ export default function VideoUpload() {
     formData.append("fileToUpload", file, name)
 
     updateProcessingStep("Upload Initalized", 'active')
-    await axiosPostRequest(formData)
+    //  await axiosPostRequest(formData)
+    const response = await getMasterFileUri(formData)
+    setVideoUri(response.masterFileUri);
     wsManager(uuid)
   }, [file, axiosPostRequest, wsManager, updateProcessingStep])
 
@@ -213,7 +250,49 @@ export default function VideoUpload() {
           </ScrollArea>
         )}
       </div>
-      <VideoPlayer></VideoPlayer>
+
+
+      {stepCompleted && (
+        <div className="flex justify-end items-center mt-5 space-x-2">
+          <div className="flex items-center border rounded-md overflow-hidden bg-white">
+            <p className="px-3 py-2 text-sm">{videoUri}</p>
+            <Button
+              size="sm"
+              variant="ghost"
+              className="hover:bg-gray-100 focus:ring-2 focus:ring-gray-200"
+              aria-label="Copy to clipboard"
+              onClick={handleCopy}
+            >
+              <ClipboardIcon size={16} />
+            </Button>
+          </div>
+          <Button
+            size="sm"
+            variant="outline"
+            className="hover:bg-gray-100 focus:ring-2 focus:ring-gray-200"
+            aria-label="Open video"
+            onClick={() => setOpenVideo(true)} // Added onClick here
+          >
+            <VideoIcon size={16} />
+          </Button>
+        </div>
+      )}
+
+      {openVideo && (
+        <div className="main-container absolute inset-0 flex justify-center items-center aspect-video w-screen h-screen bg-gray-950">
+          <button
+            type="button"
+            className="absolute top-0 right-0 m-4"
+            aria-label="Close video"
+            onClick={() => setOpenVideo(false)} // Added onClick for better accessibility
+          >
+            <XIcon size={26} color="white" />
+          </button>
+          <VideoPlayer videoSrc={videoUri} />
+        </div>
+      )}
+
+
       <ToastContainer
         position="top-right"
         autoClose={5000}
@@ -226,6 +305,6 @@ export default function VideoUpload() {
         pauseOnHover
         theme="light"
       />
-    </div>
+    </div >
   )
 }

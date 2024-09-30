@@ -1,8 +1,9 @@
 import { Controls } from "@/lib/controls";
-import { Maximize, Minimize, Play, Pause, Settings, VolumeX, Volume2, Volume1 } from "lucide-react";
+import { hls } from "@/lib/hls";
+import { Maximize, Minimize, Play, Pause, Settings, VolumeX, Volume2, Volume1, Check } from "lucide-react";
 
 import { useEffect, useRef, useState } from "react";
-export default function VideoPlayer() {
+export default function VideoPlayer({ videoSrc }: { videoSrc: string }) {
   const controls = new Controls();
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -18,7 +19,40 @@ export default function VideoPlayer() {
   const [isMuted, setIsMuted] = useState<boolean>(false);
   const [volume, setVolume] = useState<number>(1);
   const [volumeHover, setVolumeHover] = useState<boolean>(false);
+  const [levels, setLevels] = useState<string[]>([])
+  const [isSettingOpen, setIsSettingOpen] = useState<boolean>(false);
+  const [selectedQuality, setSelectedQuality] = useState<string>("auto");
+  const hlsInstance = useRef<hls | null>(null);
 
+
+
+  useEffect(() => {
+    const handleSettingClick = (event: MouseEvent) => {
+      if (isSettingOpen &&
+        !(event.target as HTMLElement).closest('.QualitySetting') &&
+        !(event.target as HTMLElement).closest('#settingBtn')) {
+        setIsSettingOpen(false);
+      }
+    }
+    window.addEventListener("click", handleSettingClick)
+
+
+    return () => {
+      window.removeEventListener("click", handleSettingClick)
+    }
+
+
+  }, [isSettingOpen])
+
+  useEffect(() => {
+    hlsInstance.current = new hls(videoRef.current, videoSrc); // Initialize hlsInstance
+    hlsInstance.current.init();
+
+    return () => {
+      // Clean up the instance if necessary
+      hlsInstance.current = null;
+    };
+  }, [videoSrc]);
 
   useEffect(() => {
     const videoElement = videoRef.current;
@@ -30,11 +64,11 @@ export default function VideoPlayer() {
       setCurrentDuration((target.currentTime / 60))
       setIsMuted(target.muted)
       target.volume = isMuted ? 0 : 1
-      console.log(target.volume)
       setVolume(target.volume);
+      const levels = hlsInstance.current?.getHlsLevels();
+      if (!levels) return;
+      setLevels(levels);
     };
-
-
 
     videoElement.addEventListener("loadedmetadata", handleLoadedMetadata);
 
@@ -44,18 +78,22 @@ export default function VideoPlayer() {
     };
   }, [videoRef]);
 
-
-
-
+  const setQuality = (index: number, level: string) => {
+    console.log(index)
+    if (!hlsInstance.current) {
+      console.error("HLS instance not available");
+      return;
+    }
+    hlsInstance.current.setQuality(index, setSelectedQuality, level);
+  };
   return (
 
 
     <div
       ref={containerRef}
-      className="main-container absolute inset-0 bg-black overflow-hidden">
-      <div className="wrapper-container relative flex w-full h-full justify-center items-center">
+      className="relative w-[1000px] aspect-video">
+      <div className="wrapper-container relative flex w-full h-full justify-center items-end">
         <video
-          src="https://videos.pexels.com/video-files/1321208/1321208-uhd_2560_1440_30fps.mp4"
           className="w-full h-full object-cover"
           ref={videoRef}
           onTimeUpdate={(event) => controls.setWidthOfProgressFill(
@@ -66,6 +104,22 @@ export default function VideoPlayer() {
             setIsPlaying
           )}
         />
+        {isSettingOpen && (
+          <div className="QualitySetting absolute bottom-16 right-4 w-48 border-white rounded-xl bg-[#323232] bg-opacity-90 py-2 z-10 ">
+            {levels.map((level, index) => {
+              return (
+                <div
+                  key={index} // Use the index or a unique identifier if available
+                  className="option flex items-center space-x-2 cursor-pointer hover:bg-white px-4 hover:bg-opacity-5 py-2"
+                  onClick={() => setQuality(index, level)}
+                >
+                  <Check size={16} color={selectedQuality !== level ? "transparent" : "white"} /> {/* Adjust as needed */}
+                  <h1 className="text-white">{level}</h1> {/* Adjust as needed */}
+                </div>
+              );
+            })}
+          </div>
+        )}
         <div
           className="controller-main-wrappe | absolute bottom-0 left-0 right-0 p-4 w-full bg-gradient-to-t from-black to-transparentr flex flex-col gap-2"
           onMouseLeave={() => setVolumeHover(false)} >
@@ -151,8 +205,16 @@ export default function VideoPlayer() {
                 <p className="text-white">{`${currentDuration.toFixed(2)} / ${videoDuration.toFixed(2)}`}</p>
               </div>
 
-              <div className="flex space-x-4">
-                <button className="text-white hover:text-gray-300">
+              <div className="flex space-x-4 ">
+
+                <button
+                  id="settingBtn"
+                  className="text-white hover:text-gray-300"
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    setIsSettingOpen(!isSettingOpen)
+                  }}
+                >
                   <Settings size={24} />
                 </button>
                 <button onClick={() => controls.handleFullScreen(containerRef.current, setIsFullScreen)}
